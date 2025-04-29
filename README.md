@@ -115,6 +115,6 @@ Além de promover a inclusão, também prepara alunos e professores para um ensi
 
 ## 📬 Contato
 
-Caso queira saber mais sobre o projeto, entre em contato com um dos autores via GitHub ou ETEC.
+Caso queira saber mais sobre o projeto, entre em contato com um dos autores via GitHub.
 
 ---
