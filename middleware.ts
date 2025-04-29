@@ -14,7 +14,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (pathname.startsWith("/User") && userType !== "user") {
+  if (pathname.startsWith("/User") && userType !== "aluno") {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

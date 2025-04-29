@@ -57,6 +57,7 @@ export default function Dashboard() {
   }, []); // O array vazio garante que o gráfico seja criado apenas uma vez, quando o componente for montado
 
   return (
+    
     <div className="flex">
       <Navbar userType={userType} /> {/* Passando a prop userType corretamente */}
       <div className="container mx-auto px-4 py-6 flex-1">

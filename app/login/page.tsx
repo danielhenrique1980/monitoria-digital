@@ -50,7 +50,7 @@ export default function Login() {
 
       if (role === "admin") router.push("/admin/dashboard");
       else if (role === "monitor") router.push("/monitor/dashboard");
-      else if (role === "aluno") router.push("/user/dashboard");
+      else if (role === "aluno") router.push("/User/dashboard");
     } catch {
       setError("E-mail ou senha inválidos!");
     } finally {

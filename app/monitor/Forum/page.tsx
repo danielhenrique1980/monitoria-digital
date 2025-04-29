@@ -1,5 +1,5 @@
 "use client";
-
+import Navbar from '../../components/Navbar'; // Caminho correto para Navbar
 import { useState } from "react";
 
 interface Comment {
@@ -17,6 +17,8 @@ interface Post {
 }
 
 const Home = () => {
+  const userType: 'admin' | 'monitor' | 'student' = 'monitor'; // Defina corretamente o tipo de usuário
+
   const [posts, setPosts] = useState<Post[]>([
     {
       id: 1,
@@ -74,7 +76,10 @@ const Home = () => {
   };
 
   return (
+    
     <div className="min-h-screen bg-gray-100 py-12 px-6 sm:px-12">
+            <Navbar userType={userType} /> {/* Passando a prop userType corretamente */}
+
       <div className="container mx-auto max-w-3xl bg-white p-6 rounded-lg shadow-md">
         <h1 className="text-3xl font-bold text-blue-600 text-center mb-6">Fórum de Discussões</h1>
 
