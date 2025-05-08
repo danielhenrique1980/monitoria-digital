@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { FaGithub } from "react-icons/fa";
 import {
   Bars3Icon,
   XMarkIcon,
@@ -43,7 +44,10 @@ export default function LandingPage() {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     usuarios: true, // Apenas o primeiro começa expandido
   });
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Novo estado para o dropdown de tecnologias na versão mobile
+  const [mobileTechDropdownOpen, setMobileTechDropdownOpen] = useState(false);
 
   // Função para alternar a expansão da seção
   const toggleSection = (sectionId: string) => {
@@ -53,8 +57,10 @@ export default function LandingPage() {
     }));
   };
 
+
+
   return (
-    <div className="min-h-screen flex flex-col">
+   <div className="min-h-screen flex flex-col">
       {/* Barra de Navegação */}
       <nav className="bg-fundo text-titulo shadow-md py-4 px-6">
         <div className="container mx-auto flex justify-between items-center">
@@ -62,21 +68,47 @@ export default function LandingPage() {
           <h1 className="text-2xl font-bold">Monitoria Digital</h1>
 
           {/* Menu Desktop */}
-          <div className="hidden md:flex space-x-6">
-            <Link href="#tecnologias" className="hover:text-destaque transition">
-              Tecnologias
-            </Link>
+          <div className="hidden md:flex space-x-6 items-center">
+            {/* Dropdown Tecnologias */}
+            <div className="relative group">
+              <button className="hover:text-destaque transition focus:outline-none">
+                Tecnologias
+                <svg
+                  className="ml-1 h-4 w-4 inline-block"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+              <div className="absolute left-0 mt-2 w-40 bg-fundo shadow-lg rounded hidden group-hover:block">
+                <Link href="/tecnologia/nextjs" className="block px-4 py-2 hover:bg-gray-50">
+                  Next.js
+                </Link>
+                <Link href="/tecnologia/javascript" className="block px-4 py-2 hover:bg-gray-50">
+                  JavaScript
+                </Link>
+                <Link href="/tecnologia/mysql" className="block px-4 py-2 hover:bg-gray-50">
+                  MySQL
+                </Link>
+              </div>
+            </div>
+
             <Link href="#documentacao" className="hover:text-destaque transition">
               Documentação
             </Link>
-
           </div>
 
           {/* Botões de Login e Início */}
           <div className="hidden md:flex items-center space-x-4">
             <Link
               href="/login"
-              className="bg-botao text-textoBotao px-4 py-2 rounded-md hover:bg-destaque transition">
+              className="bg-botao text-textoBotao px-4 py-2 rounded-md hover:bg-destaque transition"
+            >
               Login
             </Link>
           </div>
@@ -98,13 +130,41 @@ export default function LandingPage() {
         {mobileMenuOpen && (
           <div className="md:hidden mt-4 py-4 bg-fundo border-t border-secundario">
             <div className="flex flex-col space-y-4 px-6">
-              <Link
-                href="#tecnologias"
-                className="hover:text-destaque transition"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Tecnologias
-              </Link>
+              {/* Dropdown para Tecnologias na versão mobile */}
+              <div>
+                <button
+                  onClick={() => setMobileTechDropdownOpen(!mobileTechDropdownOpen)}
+                  className="w-full text-left px-4 py-3 hover:text-destaque transition"
+                >
+                  Tecnologias
+                </button>
+                {mobileTechDropdownOpen && (
+                  <div className="pl-4">
+                    <Link
+                      href="/tecnologia/nextjs"
+                      className="block px-4 py-2 hover:text-destaque transition"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Next.js
+                    </Link>
+                    <Link
+                      href="/tecnologia/javascript"
+                      className="block px-4 py-2 hover:text-destaque transition"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      JavaScript
+                    </Link>
+                    <Link
+                      href="/tecnologia/mysql"
+                      className="block px-4 py-2 hover:text-destaque transition"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      MySQL
+                    </Link>
+                  </div>
+                )}
+              </div>
+
               <Link
                 href="#documentacao"
                 className="hover:text-destaque transition"
@@ -192,7 +252,7 @@ export default function LandingPage() {
               {/* Placeholder/sombra para screenshot do sistema */}
               <div className="bg-fundo p-2 rounded-lg border shadow-lg">
                 {/*Substituir pelo iframe ou imagem real */}
-                <Image src={"/opengraph-image.png"} alt="Plataforma Monitoria Digital" width={600} height={400}/>
+                <Image src={"/Homepage_2.png"} alt="Plataforma Monitoria Digital" width={600} height={400}/>
               </div>
             </div>
           </div>
@@ -209,10 +269,10 @@ export default function LandingPage() {
             Conecte-se com seus alunos e monitores em potenciais e em tempo real, aumente seu desempenho acadêmico e acelere o seu aprendizado.
           </p>
           <Link
-            href="/Login"
+            href="/login"
             className="bg-fundo text-destaque px-8 py-4 rounded-md hover:bg-gray-100 transition inline-block text-lg font-medium"
           >
-            Conecte-se Agora
+            Conecte-se agora
           </Link>
         </div>
       </section>
@@ -229,17 +289,10 @@ export default function LandingPage() {
               </p>
               <div className="flex space-x-4">
                 {/* Ícones de Redes Sociais */}
-                <a href="#" className="hover:text-destaque transition">
-                  <span className="sr-only">Facebook</span>
-                  <div className="h-6 w-6 bg-fundo rounded-full"></div>
-                </a>
-                <a href="#" className="hover:text-destaque transition">
-                  <span className="sr-only">Twitter</span>
-                  <div className="h-6 w-6 bg-fundo rounded-full"></div>
-                </a>
-                <a href="#" className="hover:text-destaque transition">
-                  <span className="sr-only">LinkedIn</span>
-                  <div className="h-6 w-6 bg-fundo rounded-full"></div>
+                <a href="https://github.com/alvaromsp87/MonitoriaDigital1.0.git" className="hover:text-destaque transition">
+                  <div className="h-6 w-6 bg-fundo rounded-full">
+                  <FaGithub className="h-6 w-6 bg-black rounded-full"/>
+                  </div>
                 </a>
               </div>
             </div>
@@ -263,16 +316,6 @@ export default function LandingPage() {
                     Seja um monitor
                   </Link>
                 </li>
-              </ul>
-            </div>
-
-            {/* Coluna 3 - Contato */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Contato</h3>
-              <ul className="space-y-2">
-                <li>contato@monitoriadigital.com</li>
-                <li>+55 (11) 95895-2041</li>
-                <li>São Paulo, SP - Brasil</li>
               </ul>
             </div>
 
