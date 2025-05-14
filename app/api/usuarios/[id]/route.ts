@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
+import { pool } from '@monitoriadigital/lib/db';
 
 export async function DELETE(
   request: Request,
