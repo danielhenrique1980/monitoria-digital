@@ -20,6 +20,8 @@
     ],
     "paths": {
       "@monitoriadigital/*": ["./*"]
+      "@/*": ["./*"],
+
     },
     "typeRoots": ["./node_modules/@types", "./types"]
   },
