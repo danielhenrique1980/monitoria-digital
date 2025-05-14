@@ -1,9 +1,10 @@
-// app/layout.tsx
+"use client";
 import Footer from './components/footer';
 import type { Metadata } from "next";
 import Script from "next/script";
-import "./globals.css";
+import "../styles/globals.css";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from './context/ThemeContext';
 import FloatingChat from "./components/FloatingChat";
 
 export const metadata: Metadata = {
@@ -13,20 +14,22 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt">
       <body className="min-h-screen flex flex-col">
-        <div className="flex flex-col flex-grow">
-          <AuthProvider>
-            <main className="flex-grow">
-              {children}
-            </main>
-            <FloatingChat />
-          </AuthProvider>
-        </div>
+        <ThemeProvider>
+          <div className="flex flex-col flex-grow">
+            <AuthProvider>
+              <main className="flex-grow">
+                {children}
+              </main>
+              <FloatingChat />
+            </AuthProvider>
+          </div>
 
-        <Footer />
+          <Footer />
 
-        <Script src="https://meet.jit.si/external_api.js" strategy="lazyOnload" />
+          <Script src="https://meet.jit.si/external_api.js" strategy="lazyOnload" />
+        </ThemeProvider>
       </body>
     </html>
   );

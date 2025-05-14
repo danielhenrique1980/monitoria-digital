@@ -8,6 +8,7 @@ import axios from "axios";
 import { Eye, EyeOff, Sun, Moon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { useTheme } from "../context/ThemeContext"; // importe o hook
 
 interface LoginResponse {
   role: "admin" | "monitor" | "aluno";
@@ -21,7 +22,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [resetSent, setResetSent] = useState(false);
   const [showReset, setShowReset] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode, toggleDarkMode } = useTheme(); // use o estado global
   const router = useRouter();
   const { login } = useAuth();
 
@@ -91,7 +92,7 @@ export default function Login() {
       >
         <button
           className="absolute top-4 right-4 text-xl"
-          onClick={() => setDarkMode(!darkMode)}
+          onClick={toggleDarkMode}
           aria-label="Alternar modo escuro"
         >
           {darkMode ? <Sun className="text-yellow-300" /> : <Moon className="text-gray-600" />}
