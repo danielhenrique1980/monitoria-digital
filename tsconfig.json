@@ -18,11 +18,11 @@
         "name": "next"
       }
     ],
-    "paths": {
-      "@monitoriadigital/*": ["./*"]
-      "@/*": ["./*"],
+  "paths": {
+  "@/*": ["./*"],
+  "@monitoriadigital/*": ["./*"]
+}
 
-    },
     "typeRoots": ["./node_modules/@types", "./types"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
