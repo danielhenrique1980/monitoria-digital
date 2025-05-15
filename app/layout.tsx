@@ -2,7 +2,7 @@
 import Footer from './components/footer';
 import type { Metadata } from "next";
 import Script from "next/script";
-import "../styles/globals.css";
+import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from './context/ThemeContext';
 import FloatingChat from "./components/FloatingChat";
