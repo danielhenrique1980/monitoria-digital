@@ -1,4 +1,4 @@
-"use client";
+//"use client";
 import Footer from './components/footer';
 import type { Metadata } from "next";
 import Script from "next/script";
