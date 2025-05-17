@@ -14,6 +14,11 @@ type Usuario = {
   data_nascimento?: string;
 };
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
 export default function CadastroPage() {
   const [formData, setFormData] = useState({
     nome: '',
@@ -32,28 +37,31 @@ export default function CadastroPage() {
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [file, setFile] = useState<File | null>(null);
 
-  const carregarUsuarios = async () => {
-    try {
-      setCarregando(true);
-      setErro(null);
-      
-      const res = await fetch('/api/usuarios');
-      
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || `Erro na requisição: ${res.status}`);
+const carregarUsuarios = async () => {
+  try {
+    setCarregando(true);
+    setErro(null);
+    
+    const res = await fetch('/api/usuarios', {
+      headers: {
+        'Content-Type': 'application/json'
       }
-      
-      const data: Usuario[] = await res.json();
-      setUsuarios(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar usuários:', error);
-      setErro(error.message);
-      setUsuarios([]);
-    } finally {
-      setCarregando(false);
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || `Erro ${res.status}`);
     }
-  };
+
+    const data = await res.json();
+    setUsuarios(data);
+  } catch (error) {
+    console.error("Erro ao carregar usuários:", error);
+    setErro(error instanceof Error ? error.message : "Erro desconhecido");
+  } finally {
+    setCarregando(false);
+  }
+};
 
   useEffect(() => {
     carregarUsuarios();
@@ -80,11 +88,12 @@ export default function CadastroPage() {
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json();
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Erro ao processar requisição');
+      }
 
-      if (!res.ok) throw new Error(data.error || 'Erro desconhecido');
-
-      alert(editandoId ? 'Usuário atualizado!' : 'Usuário cadastrado!');
+      alert(editandoId ? 'Usuário atualizado com sucesso!' : 'Usuário cadastrado com sucesso!');
       setEditandoId(null);
       setFormData({
         nome: '',
@@ -98,15 +107,14 @@ export default function CadastroPage() {
       });
       await carregarUsuarios();
     } catch (error) {
-      alert(error.message);
+      alert(getErrorMessage(error));
     } finally {
       setCarregando(false);
     }
   };
 
   const handleDelete = async (id_usuario: number) => {
-    const confirm = window.confirm('Tem certeza que deseja excluir este usuário?');
-    if (!confirm) return;
+    if (!window.confirm('Tem certeza que deseja excluir este usuário?')) return;
 
     try {
       const res = await fetch(`/api/usuarios/${id_usuario}`, {
@@ -114,15 +122,14 @@ export default function CadastroPage() {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || 'Erro ao deletar usuário');
       }
 
       alert('Usuário deletado com sucesso!');
       await carregarUsuarios();
     } catch (error) {
-      console.error('Erro na exclusão:', error);
-      alert(error.message);
+      alert(getErrorMessage(error));
     }
   };
 
@@ -156,29 +163,46 @@ export default function CadastroPage() {
             body: JSON.stringify(result.data),
           });
 
-          if (!res.ok) throw new Error(await res.text());
+          if (!res.ok) {
+            throw new Error(await res.text());
+          }
           
           alert('Importação concluída com sucesso!');
-          carregarUsuarios();
+          await carregarUsuarios();
         } catch (error) {
-          alert(`Erro na importação: ${error.message}`);
+          alert(`Erro na importação: ${getErrorMessage(error)}`);
         }
+      },
+      error: (error: Error) => {
+        alert(`Erro ao processar CSV: ${error.message}`);
       },
     });
   };
 
   const handleCSVExport = () => {
-    const csv = Papa.unparse(usuarios);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+    if (!Array.isArray(usuarios)) {
+      alert('Dados inválidos para exportação');
+      return;
+    }
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'usuarios.csv';
-    link.click();
+    try {
+      const csv = Papa.unparse(usuarios);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `usuarios_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      alert(`Erro ao exportar: ${getErrorMessage(error)}`);
+    }
   };
 
-  if (carregando) {
+  if (carregando && usuarios.length === 0) {
     return (
       <div className="min-h-screen bg-gray-100">
         <Navbar userType="admin" />
@@ -199,6 +223,12 @@ export default function CadastroPage() {
         <div className="max-w-6xl mx-auto p-4">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
             <strong>Erro ao carregar dados:</strong> {erro}
+            <button 
+              onClick={carregarUsuarios}
+              className="ml-4 text-blue-600 hover:text-blue-800"
+            >
+              Tentar novamente
+            </button>
           </div>
         </div>
       </div>
@@ -238,6 +268,7 @@ export default function CadastroPage() {
             onChange={handleChange}
             className="border px-3 py-2 rounded"
             required={!editandoId}
+            minLength={6}
           />
           <select
             name="tipo"
@@ -279,47 +310,70 @@ export default function CadastroPage() {
             onChange={handleChange}
             className="border px-3 py-2 rounded"
           />
-          <button
-            type="submit"
-            disabled={carregando}
-            className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 col-span-1 disabled:bg-gray-400"
-          >
-            {carregando ? 'Salvando...' : editandoId ? 'Atualizar' : 'Cadastrar'}
-          </button>
+          <div className="flex gap-2 col-span-full">
+            <button
+              type="submit"
+              disabled={carregando}
+              className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 flex-1 disabled:bg-gray-400"
+            >
+              {carregando ? 'Salvando...' : editandoId ? 'Atualizar Usuário' : 'Cadastrar Usuário'}
+            </button>
+            {editandoId && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditandoId(null);
+                  setFormData({
+                    nome: '',
+                    email: '',
+                    senha: '',
+                    tipo: '',
+                    curso: '',
+                    especialidade: '',
+                    formacao_academica: '',
+                    data_nascimento: '',
+                  });
+                }}
+                className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600"
+              >
+                Cancelar Edição
+              </button>
+            )}
+          </div>
         </form>
 
-        <div className="mb-6 flex gap-4 items-center">
+        <div className="mb-6 flex flex-col sm:flex-row gap-4 items-center">
           <input
             type="file"
             accept=".csv"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="border p-2 rounded"
+            className="border p-2 rounded w-full sm:w-auto"
           />
-          <button
-            onClick={handleCSVImport}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Importar CSV
-          </button>
-          <button
-            onClick={handleCSVExport}
-            className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-          >
-            Exportar CSV
-          </button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <button
+              onClick={handleCSVImport}
+              disabled={!file}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 flex-1"
+            >
+              Importar CSV
+            </button>
+            <button
+              onClick={handleCSVExport}
+              disabled={usuarios.length === 0}
+              className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 disabled:bg-gray-400 flex-1"
+            >
+              Exportar CSV
+            </button>
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full bg-white rounded shadow overflow-hidden">
+        <div className="overflow-x-auto bg-white rounded shadow">
+          <table className="w-full">
             <thead className="bg-gray-200">
               <tr>
                 <th className="text-left p-2">Nome</th>
                 <th className="text-left p-2">Email</th>
                 <th className="text-left p-2">Tipo</th>
-                <th className="text-left p-2">Curso</th>
-                <th className="text-left p-2">Especialidade</th>
-                <th className="text-left p-2">Formação</th>
-                <th className="text-left p-2">Nascimento</th>
                 <th className="text-left p-2">Ações</th>
               </tr>
             </thead>
@@ -330,14 +384,10 @@ export default function CadastroPage() {
                     <td className="p-2">{usuario.nome}</td>
                     <td className="p-2">{usuario.email}</td>
                     <td className="p-2 capitalize">{usuario.tipo}</td>
-                    <td className="p-2">{usuario.curso || '-'}</td>
-                    <td className="p-2">{usuario.especialidade || '-'}</td>
-                    <td className="p-2">{usuario.formacao_academica || '-'}</td>
-                    <td className="p-2">{usuario.data_nascimento?.split('T')[0] || '-'}</td>
-                    <td className="p-2 space-x-2">
+                    <td className="p-2 space-x-2 whitespace-nowrap">
                       <button
                         onClick={() => handleEdit(usuario)}
-                        className="text-blue-600 hover:underline"
+                        className="text-blue-600 hover:underline mr-2"
                       >
                         Editar
                       </button>
@@ -352,7 +402,7 @@ export default function CadastroPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="p-4 text-center text-gray-500">
+                  <td colSpan={4} className="p-4 text-center text-gray-500">
                     Nenhum usuário cadastrado
                   </td>
                 </tr>
