@@ -1,3 +1,4 @@
+//app/components/calendarioAgendamento
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -22,6 +23,7 @@ export default function CalendarioAgendamento() {
   }, [dataSelecionada]);
 
   const handleDataChange = (value: Date | Date[]) => {
+    console.log('handleDataChage camado com:', value);
     if (Array.isArray(value)) {
       setDataSelecionada(value[0]);
     } else {
